@@ -30,7 +30,7 @@ class AvatarSession:
     def __init__(
         self,
         *,
-        avatar_id: NotGivenOr[str] = NOT_GIVEN
+        avatar_id: NotGivenOr[str] = NOT_GIVEN,
         api_key: NotGivenOr[str] = NOT_GIVEN,
         avatar_participant_identity: NotGivenOr[str] = NOT_GIVEN,
         avatar_participant_name: NotGivenOr[str] = NOT_GIVEN,
@@ -44,7 +44,9 @@ class AvatarSession:
             conn_options=conn_options,
             session=self._ensure_http_session(),
         )
-        self._avatar_participant_identity = avatar_participant_identity or _AVATAR_AGENT_IDENTITY
+        self._avatar_participant_identity = (
+            avatar_participant_identity or _AVATAR_AGENT_IDENTITY
+        )
         self._avatar_participant_name = avatar_participant_name or _AVATAR_AGENT_NAME
 
     def _ensure_http_session(self) -> aiohttp.ClientSession:
@@ -65,13 +67,12 @@ class AvatarSession:
         livekit_url = livekit_url or os.getenv("LIVEKIT_URL")
         livekit_api_key = livekit_api_key or os.getenv("LIVEKIT_API_KEY")
         livekit_api_secret = livekit_api_secret or os.getenv("LIVEKIT_API_SECRET")
-        
+
         if not livekit_url or not livekit_api_key or not livekit_api_secret:
             raise AvatarioException(
                 "livekit_url, livekit_api_key, and livekit_api_secret must be set "
                 "by arguments or environment variables"
             )
-
 
         livekit_token = (
             api.AccessToken(api_key=livekit_api_key, api_secret=livekit_api_secret)
@@ -80,7 +81,9 @@ class AvatarSession:
             .with_name(self._avatar_participant_name)
             .with_grants(api.VideoGrants(room_join=True, room=room.name))
             # allow the avatar agent to publish audio and video on behalf of your local agent
-            .with_attributes({ATTRIBUTE_PUBLISH_ON_BEHALF: room.local_participant.identity})
+            .with_attributes(
+                {ATTRIBUTE_PUBLISH_ON_BEHALF: room.local_participant.identity}
+            )
             .to_jwt()
         )
 
@@ -96,7 +99,9 @@ class AvatarSession:
         )
 
         logger.debug("waiting for avatar agent to join the room")
-        await utils.wait_for_participant(room=room, identity=self._avatar_participant_identity)
+        await utils.wait_for_participant(
+            room=room, identity=self._avatar_participant_identity
+        )
 
         agent_session.output.audio = DataStreamAudioOutput(
             room=room,

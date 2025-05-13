@@ -46,7 +46,7 @@ class AvatarioAPI:
         avatar_id: NotGivenOr[str] = NOT_GIVEN,
         livekit_agent_identity: NotGivenOr[str] = NOT_GIVEN,
         properties: NotGivenOr[dict[str, Any]] = NOT_GIVEN,
-        extra_paylad: NotGivenOr[dict[str, Any]] = NOT_GIVEN,
+        extra_payload: NotGivenOr[dict[str, Any]] = NOT_GIVEN,
     ) -> None:
         avatar_id = avatar_id or os.getenv("AVATARIO_REPLICA_ID")
         if not avatar_id:
@@ -94,12 +94,16 @@ class AvatarioAPI:
                     if not response.ok:
                         text = await response.text()
                         raise APIStatusError(
-                            "Server returned an error", status_code=response.status, body=text
+                            "Server returned an error",
+                            status_code=response.status,
+                            body=text,
                         )
                     await response.json()
             except Exception as e:
                 if isinstance(e, APIConnectionError):
-                    logger.warning("failed to call avatario api", extra={"error": str(e)})
+                    logger.warning(
+                        "failed to call avatario api", extra={"error": str(e)}
+                    )
                 else:
                     logger.exception("failed to call avatario api")
 
